@@ -1,0 +1,233 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{007BCB6C-A591-4308-B0CE-7C34009B16DE}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Kontur.Recognition</RootNamespace>
+    <AssemblyName>Kontur.Recognition.Core</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin.debug\external_lib\$(ProjectName)\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>..\..\bin.debug\external_lib\Kontur.Recognition.Core.XML</DocumentationFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin.release\external_lib\$(ProjectName)\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>..\..\bin.release\external_lib\Kontur.Recognition.Core.XML</DocumentationFile>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Api\OCREngineInfo.cs" />
+    <Compile Include="Api\OCRFeatures.cs" />
+    <Compile Include="Api\OCREngineException.cs" />
+    <Compile Include="Api\IOCREngine.cs" />
+    <Compile Include="Api\RecognitionResult.cs" />
+    <Compile Include="Api\RecognitionResultExtensions.cs" />
+    <Compile Include="GeometryModel\Angles.cs" />
+    <Compile Include="GeometryModel\BoundingBox.cs" />
+    <Compile Include="ImageProcessing\ColorSpace.cs" />
+    <Compile Include="ImageProcessing\ColorDepth.cs" />
+    <Compile Include="GeometryModel\DeskewParameters.cs" />
+    <Compile Include="GeometryModel\DeskewProcessor.cs" />
+    <Compile Include="GeometryModel\GMElement.cs" />
+    <Compile Include="GeometryModel\GMLine.cs" />
+    <Compile Include="GeometryModel\GMParagraph.cs" />
+    <Compile Include="GeometryModel\GMSeparator.cs" />
+    <Compile Include="GeometryModel\GMTable.cs" />
+    <Compile Include="GeometryModel\GMTableCell.cs" />
+    <Compile Include="GeometryModel\GMTextBlock.cs" />
+    <Compile Include="GeometryModel\GMWord.cs" />
+    <Compile Include="GeometryModel\GridUnit.cs" />
+    <Compile Include="GeometryModel\GridUnitsTranslator.cs" />
+    <Compile Include="ImageProcessing\ImageModel.cs" />
+    <Compile Include="GeometryModel\IsometricTransform.cs" />
+    <Compile Include="GeometryModel\NormalizationTransform.cs" />
+    <Compile Include="GeometryModel\Supplement\CombinedModelCreator.cs" />
+    <Compile Include="GeometryModel\Supplement\LinesHashInGeometryModel.cs" />
+    <Compile Include="GeometryModel\Transform\ITransform.cs" />
+    <Compile Include="GeometryModel\ModelGeometryTransformer.cs" />
+    <Compile Include="GeometryModel\Point.cs" />
+    <Compile Include="GeometryModel\ResolutionUnit.cs" />
+    <Compile Include="GeometryModel\RoundMode.cs" />
+    <Compile Include="GeometryModel\TextGeometryModel.cs" />
+    <Compile Include="GeometryModel\TextGeometryModelExtensions.cs" />
+    <Compile Include="ImageBinarizer\ImageBinarizer.cs" />
+    <Compile Include="ImageDeskewer\SkewAngleDeterminer.cs" />
+    <Compile Include="ImageDeskewer\FastImageDeskewer.cs" />
+    <Compile Include="ImageDeskewer\ImageProcessing\BitmapProcessor.cs" />
+    <Compile Include="ImageDeskewer\ImageProcessing\ImagePartitioner.cs" />
+    <Compile Include="GeometryModel\Transform\Rotation.cs" />
+    <Compile Include="GeometryModel\Transform\Scale.cs" />
+    <Compile Include="GeometryModel\Transform\Shift.cs" />
+    <Compile Include="GeometryModel\Transform\Composite.cs" />
+    <Compile Include="ImageDeskewer\ImageProcessing\ImageSizesModifier.cs" />
+    <Compile Include="ImageDeskewer\OrientationDeterminer.cs" />
+    <Compile Include="ImageDeskewer\RectanglesProcessing\BoxParser.cs" />
+    <Compile Include="ImageDeskewer\RectanglesProcessing\RectanglesProcessor.cs" />
+    <Compile Include="ImageDeskewer\RectanglesProcessing\TextLine.cs" />
+    <Compile Include="ImageDeskewer\Utils\FourierFilters.cs" />
+    <Compile Include="ImageDeskewer\Utils\ImagePrinter.cs" />
+    <Compile Include="ImageProcessing\CompressionType.cs" />
+    <Compile Include="ImageBinarizer\WhiteLocalThresholdBinarizer.cs" />
+    <Compile Include="Integration\HocrFormatConsts.cs" />
+    <Compile Include="Integration\HocrFormatParser.cs" />
+    <Compile Include="Integration\HocrFormatProducer.cs" />
+    <Compile Include="ImageCore\KrecImage.cs" />
+    <Compile Include="ImageCore\KrecImagePixelFormat.cs" />
+    <Compile Include="ImageCore\KrecImagePixelFormatExtensions.cs" />
+    <Compile Include="Processes\DocumentTotalPagesCountExtractor.cs" />
+    <Compile Include="Processes\IOutputProcessor.cs" />
+    <Compile Include="Processes\OutputProcessorNull.cs" />
+    <Compile Include="Processes\ProcessExecutionException.cs" />
+    <Compile Include="Processes\ProcessExecutionResult.cs" />
+    <Compile Include="Processes\ProcessExecutor.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SpreadSheetModel\CellContentType.cs" />
+    <Compile Include="SpreadSheetModel\CellFormat.cs" />
+    <Compile Include="SpreadSheetModel\CellRange.cs" />
+    <Compile Include="SpreadSheetModel\ICellFormatsProvider.cs" />
+    <Compile Include="SpreadSheetModel\ISpreadSheetColumn.cs" />
+    <Compile Include="SpreadSheetModel\ISpreadsheetModel.cs" />
+    <Compile Include="SpreadSheetModel\ISpreadSheetRow.cs" />
+    <Compile Include="SpreadSheetModel\NumberFormatExtensions.cs" />
+    <Compile Include="SpreadSheetModel\SpreadsheetCellScanOrder.cs" />
+    <Compile Include="SpreadSheetModel\SpreadsheetModelExtensions.cs" />
+    <Compile Include="SpreadSheetModel\NumberFormat.cs" />
+    <Compile Include="SpreadSheetModel\NumberFormatsCollection.cs" />
+    <Compile Include="SpreadSheetModel\SpreadsheetCellModel.cs" />
+    <Compile Include="SpreadSheetModel\SpreadsheetModel.cs" />
+    <Compile Include="SpreadSheetModel\Xml\SpreadsheetXmlExtensions.cs" />
+    <Compile Include="SpreadSheetModel\Xml\TableSchema.cs">
+      <DependentUpon>TableSchema.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="Utils\ArrayExtensions.cs" />
+    <Compile Include="Utils\ByteFilter.cs" />
+    <Compile Include="Utils\CompoundFiles\CompoundFile.cs" />
+    <Compile Include="Utils\CompoundFiles\CompoundFileDirectory.cs" />
+    <Compile Include="Utils\CompoundFiles\CompoundFileDirEntry.cs" />
+    <Compile Include="Utils\CompoundFiles\DirEntryObjectType.cs" />
+    <Compile Include="Utils\Concurrent\Win32ProcessHelper.cs" />
+    <Compile Include="Utils\Concurrent\Timer.cs" />
+    <Compile Include="Utils\Concurrent\GlobalMutex.cs" />
+    <Compile Include="Utils\Concurrent\MultipleStreamWriter.cs" />
+    <Compile Include="Utils\Concurrent\ObjectPool\ObjectPool.cs" />
+    <Compile Include="Utils\Concurrent\ObjectPool\IObjectPoolItem.cs" />
+    <Compile Include="Utils\Concurrent\ObjectPool\SingleThreadObjectFactory.cs" />
+    <Compile Include="Utils\Concurrent\SynchronizedConsole.cs" />
+    <Compile Include="Utils\Concurrent\SynchronizedWriter.cs" />
+    <Compile Include="Utils\DictionaryExtensions.cs" />
+    <Compile Include="Utils\EmbeddedResource.cs" />
+    <Compile Include="Utils\Encodings\CharacterSubstitution.cs" />
+    <Compile Include="Utils\Encodings\CharCounters.cs" />
+    <Compile Include="Utils\Encodings\EncodingDetector.cs" />
+    <Compile Include="Utils\Encodings\FnsCharacterSubstitutions.cs" />
+    <Compile Include="Utils\Encodings\ILanguageModel.cs" />
+    <Compile Include="Utils\Encodings\LanguageModel.cs" />
+    <Compile Include="Utils\Encodings\LanguageModels\LanguageModelEnglish.cs" />
+    <Compile Include="Utils\Encodings\LanguageModels\LanguageModelRussian.cs" />
+    <Compile Include="Utils\Encodings\SparseVector.cs" />
+    <Compile Include="Utils\EnumUtils.cs" />
+    <Compile Include="Utils\Files\FileController.cs" />
+    <Compile Include="Utils\Files\FilesFactory.cs" />
+    <Compile Include="Utils\Files\FileUtils.cs" />
+    <Compile Include="Utils\Files\DirectoryLocator.cs" />
+    <Compile Include="Utils\Files\IFilesFactory.cs" />
+    <Compile Include="Utils\Files\ITempFilesFactory.cs" />
+    <Compile Include="Utils\JetBrains\Annotations\CodeAnnotations.cs" />
+    <Compile Include="Utils\Files\LocalFile.cs" />
+    <Compile Include="Utils\Logging\ConsoleLogger.cs" />
+    <Compile Include="Utils\Logging\ILogEngine.cs" />
+    <Compile Include="Utils\Logging\ILoggingModule.cs" />
+    <Compile Include="Utils\Logging\LogEngine.cs" />
+    <Compile Include="Utils\Logging\LoggerExtensions.cs" />
+    <Compile Include="Utils\Logging\ILogger.cs" />
+    <Compile Include="Utils\Logging\Log.cs" />
+    <Compile Include="Utils\Logging\LogLevel.cs" />
+    <Compile Include="Utils\Logging\MessageProducer.cs" />
+    <Compile Include="Utils\Matchers\TrieMatch.cs" />
+    <Compile Include="Utils\Matchers\TrieMatcher.cs" />
+    <Compile Include="Utils\Monitor\IProgressMonitor.cs" />
+    <Compile Include="Utils\Monitor\ProgressMonitor.cs" />
+    <Compile Include="Utils\Monitor\ProgressMonitorFake.cs" />
+    <Compile Include="Utils\PaperInfo\PaperOrientation.cs" />
+    <Compile Include="Utils\PaperInfo\PaperSize.cs" />
+    <Compile Include="Utils\Profiling\ProfilingStopWatch.cs" />
+    <Compile Include="Utils\Ref\DisposableEnumerable.cs" />
+    <Compile Include="Utils\Ref\DisposableFuture.cs" />
+    <Compile Include="Utils\Ref\DisposableCollection.cs" />
+    <Compile Include="Utils\Ref\IDisposer.cs" />
+    <Compile Include="Utils\Ref\SharedDisposableObject.cs" />
+    <Compile Include="Utils\Ref\SharedHandle.cs" />
+    <Compile Include="Utils\Ref\WeakHandle.cs" />
+    <Compile Include="Utils\Files\TempFilesFactory.cs" />
+    <Compile Include="Utils\Files\TemporaryFile.cs" />
+    <Compile Include="Utils\ResourceLoader\EmbeddedResourceLoader.cs" />
+    <Compile Include="Utils\ResourceLoader\IResourceLoader.cs" />
+    <Compile Include="Utils\Structures\Heap.cs" />
+    <Compile Include="Utils\XmlSecureReaderCreator.cs" />
+    <Compile Include="Utils\XMLUtils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SpreadSheetModel\Xml\TableSchema.xsd">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Integration\hocr.css" />
+    <EmbeddedResource Include="Integration\hocr.js" />
+    <EmbeddedResource Include="Integration\jquery.js" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>if exist "$(ProjectDir)..\..\base\models" (
+  robocopy "$(ProjectDir)Integration" "$(ProjectDir)..\..\base\models" *.js *.css
+)
+
+if exist "$(ProjectDir)..\FieldRecognition\WebTestingPlatform\PublicDB\scripts" (
+  robocopy "$(ProjectDir)Integration" "$(ProjectDir)..\FieldRecognition\WebTestingPlatform\PublicDB\scripts" *.js *.css
+)
+
+if errorlevel 4 (
+  exit /b 1
+) else (
+  exit /b 0
+)</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

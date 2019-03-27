@@ -1,0 +1,83 @@
+#scan-img {
+	position:absolute; 
+	left:0px; 
+	top:0; 
+	z-index:-1;
+}
+
+.container{
+	position: absolute;
+}
+
+.legend {
+	font-family: Consolas;
+	font-size: 1em;
+	background-color: #FFFFAA;
+	padding: 10px;
+}
+.tb, .par, .line, .tab {
+	position: absolute;
+	border:0;
+	display: none;
+	z-index: 1;
+}
+
+.show-tb .tb {
+	border:1px solid blue;
+	display: block;
+}
+
+.show-par .par {
+	border:1px solid green;
+	display: block;
+}
+
+.show-line .line {
+	border:1px solid lightgrey;
+	display: block;
+}
+
+.show-tab .tab {
+	border:6px solid rgba(255, 0, 0, 1);
+	display: block;
+	z-index: 10;
+}
+
+
+img{
+	z-index: -2;
+}
+
+.word {
+	position: absolute;
+	font-family: Arial;
+	font-size: 30px;
+	line-height: 80%;
+	white-space: nowrap;
+}
+
+.show-image .word {
+	background-color: rgba(255, 255, 255, 0);
+	color: rgba(0, 0, 0, 0);
+}
+
+.show-model .word {
+	background-color: rgba(255, 255, 255, 0);
+	color: rgba(0, 0, 0, 1);
+}
+
+.sep{
+	border:0;
+	height:0px;
+	position:absolute;
+}
+
+.show-sep .sep{
+	/* after updating border-width one should update parameter 'w' of drawLine in js to the same value */
+	border-top:3px solid rgba(0, 0, 255, 0.5);
+	border-bottom:3px solid rgba(0, 0, 255, 0.5);
+}
+
+strong{
+	font-weight: normal;
+}
