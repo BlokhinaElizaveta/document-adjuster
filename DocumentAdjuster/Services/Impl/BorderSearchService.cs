@@ -1,44 +1,45 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using Kontur.Recognition.ImageCore;
 
 namespace DocumentAdjuster.Services
 {
-    internal class BorderSearchService:IBorderSearchService
+    internal class BorderSearchService : IBorderSearchService
     {
         private readonly List<Point> borderPixels = new List<Point>();
-        public int[,] Search(int[,] image, int[,] maskX, int[,] maskY)
+        public KrecImage Search(KrecImage image, int[,] maskX, int[,] maskY)
         {
-            var width = image.GetLength(0);
-            var height = image.GetLength(1);
-            var result = new int[width, height];
+            var width = image.Width;
+            var height = image.Height;
+            var result = new KrecImage(image, new byte[image.ImageData.Length]);
 
             const int limit = 128 * 128;
-
-            for (var x = 1; x < width - 1; x++)
+            for (var lineIdx = 1; lineIdx < height - 1; lineIdx++)
             {
-                for (var y = 1; y < height - 1; y++)
+                for (var counter = 1; counter < width - 1; counter++)
                 {
                     var gX = 0;
                     var gY = 0;
-
                     for (var i = 0; i < 3; i++)
                     {
                         for (var j = 0; j < 3; j++)
                         {
-                            var pixel = image[x + j - 1, y + i - 1];
+                            var y = lineIdx + i - 1;
+                            var sourceIdx = y * image.BytesPerLine + counter;
+                            var pixel = image.ImageData[sourceIdx + j - 1];
                             gX += maskX[i, j] * pixel;
                             gY += maskY[i, j] * pixel;
                         }
                     }
 
-                    var color = 0;
+                    byte color = 0;
                     if (gX * gX + gY * gY > limit)
                     {
-                        color = 255;
-                        borderPixels.Add(new Point(x, y));
+                        color = 255;                        
+                        borderPixels.Add(new Point(counter, lineIdx));
                     }
 
-                    result[x, y] = color;
+                    result.ImageData[lineIdx * image.BytesPerLine + counter] = color;
                 }
             }
             return result;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Drawing;
-using System.Drawing.Imaging;
 using CommandLine;
+using Kontur.Recognition.ImageCore;
 using Ninject;
 
 namespace DocumentAdjuster
@@ -20,7 +20,7 @@ namespace DocumentAdjuster
                     documentAdjuster.SetDebugMode(options.Debug);
 
                     var result = documentAdjuster.Correct(document);
-                    result.Save("result.bmp", ImageFormat.Bmp);
+                    result.SaveToFile("result.bmp");
                 });
         }
     }

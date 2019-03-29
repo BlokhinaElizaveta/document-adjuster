@@ -1,35 +1,25 @@
-﻿using System;
-using System.Drawing;
+﻿using Kontur.Recognition.ImageCore;
 
 namespace DocumentAdjuster.Services
 {
     internal class SimpleBinarizationService : IBinarizationService
     {
-        public int[,] MakeBinarized(Bitmap image)
+        public KrecImage MakeBinarized(KrecImage image)
         {
-            var binaryImage = new int[image.Width, image.Height];
             const int limit = 150;
+            var grayImage = image.ToGrayscaled();
 
-            for (var x = 0; x < image.Width; x++)
+            for (var lineIdx = 0; lineIdx < grayImage.Height; lineIdx++)
             {
-                for (var y = 0; y < image.Height; y++)
+                for (int counter = 0, sourceIdx = lineIdx * grayImage.BytesPerLine; counter < grayImage.Width; counter++, sourceIdx ++)
                 {
-                    var color = 255;
-                    var grayPixel = GetShadeOfGray(image.GetPixel(x, y));
-                    if (grayPixel.R < limit && grayPixel.G < limit && grayPixel.B < limit)
-                        color = 0;
-
-                    binaryImage[x, y] = color;
+                    grayImage.ImageData[sourceIdx] = grayImage.ImageData[sourceIdx] > limit 
+                        ? (byte) 255 
+                        : (byte) 0;
                 }
             }
 
-            return binaryImage;
-        }
-
-        private static Color GetShadeOfGray(Color pixel)
-        {
-            var value = (int)Math.Round(0.2125 * pixel.R + 0.7154 * pixel.G + 0.0721 * pixel.B);
-            return Color.FromArgb(pixel.A, value, value, value);
+            return grayImage;
         }
     }
 }

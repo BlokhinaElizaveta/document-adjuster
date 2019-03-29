@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using Kontur.Recognition.ImageCore;
 
 namespace DocumentAdjuster
 {
@@ -6,7 +7,7 @@ namespace DocumentAdjuster
     // https://habr.com/ru/company/abbyy/blog/200448/
     internal interface IDocumentAdjuster
     {
-        Bitmap Correct(Bitmap documentWithBorder);
+        KrecImage Correct(Bitmap documentWithBorder);
         void SetDebugMode(bool debug);
     }
 }

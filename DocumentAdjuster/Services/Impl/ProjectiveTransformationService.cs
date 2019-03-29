@@ -2,33 +2,41 @@
 using System.Collections.Generic;
 using System.Drawing;
 using Accord.Math;
+using Kontur.Recognition.ImageCore;
 
 namespace DocumentAdjuster.Services
 {
     internal class ProjectiveTransformationService : IProjectiveTransformationService
     {
-        public Bitmap ApplyTransformMatrix(Bitmap image, List<Point> corners)
+        public KrecImage ApplyTransformMatrix(KrecImage image, List<Point> corners)
         {
             var matrix = GetMatrix(corners).Inverse();
-            var newWidth = image.Width;
-            var newHeight = image.Height;
-            var result = new Bitmap(newWidth, newHeight);
-            for (var x = 0; x < image.Width; x++)
+            var width = image.Width;
+            var height = image.Height;
+            var result = new KrecImage(image, new byte[image.ImageData.Length]);
+            for (var lineIdx = 0; lineIdx < height; lineIdx++)
             {
-                for (var y = 0; y < image.Height; y++)
+                for (int counter = 0, sourceIdx = lineIdx * image.BytesPerLine;
+                    counter < width;
+                    counter++, sourceIdx += 3)
                 {
-                    var point = new double[,] {{x, y, 1}};
+                    var point = new double[,] {{counter, lineIdx, 1}};
                     var newPoint = point.Dot(matrix);
-                    var pixel = image.GetPixel(x, y);
-                    var newX = (int) Math.Round(newPoint[0, 0] / newPoint[0, 2] * newWidth);
-                    var newY = (int) Math.Round(newPoint[0, 1] / newPoint[0, 2] * newHeight);
+                    var newX = (int) Math.Round(newPoint[0, 0] / newPoint[0, 2] * width);
+                    var newY = (int) Math.Round(newPoint[0, 1] / newPoint[0, 2] * height);
 
-                    if (newX > 0 && newX < newWidth && newY > 0 && newY < newHeight)
-                        result.SetPixel(newX, newY, Color.FromArgb(pixel.R, pixel.G, pixel.B));
+                    if (newX > 0 && newX < width && newY > 0 && newY < height)
+                    {
+                        var index = newY * image.BytesPerLine + newX * 3;
+                        result.ImageData[index] = image.ImageData[sourceIdx];
+                        result.ImageData[index + 1] = image.ImageData[sourceIdx + 1];
+                        result.ImageData[index + 2] = image.ImageData[sourceIdx + 2];
+                    }
                 }
             }
 
             return ApplySmoothingFilter(result);
+            //return result;
         }
 
         private static double[,] GetMatrix(IReadOnlyList<Point> corners)
@@ -43,7 +51,7 @@ namespace DocumentAdjuster.Services
             double y4 = corners[3].Y;
 
             var a13 = ((y4 - y3) * (x1 + x3 - x2 - x4) - (x4 - x3) * (y1 + y3 - y2 - y4)) /
-                    ((y4 - y3) * (x2 - x3) - (x4 - x3) * (y2 - y3));
+                      ((y4 - y3) * (x2 - x3) - (x4 - x3) * (y2 - y3));
             var a23 = (x1 + x3 - x2 - x4 - (x2 - x3) * a13) / (x4 - x3);
             var a33 = 1;
 
@@ -64,32 +72,40 @@ namespace DocumentAdjuster.Services
             };
         }
 
-        private static Bitmap ApplySmoothingFilter(Bitmap image)
+        private static KrecImage ApplySmoothingFilter(KrecImage image)
         {
-            var result = new Bitmap(image);
-            for (var x = 1; x < image.Width - 1; x++)
+            var result = new KrecImage(image, new byte[image.ImageData.Length]);
+            var bytesPerPixel = 3;
+            for (var lineIdx = bytesPerPixel; lineIdx < image.Height - bytesPerPixel; lineIdx++)
             {
-                for (var y = 1; y < image.Height - 1; y++)
+                for (var counter = bytesPerPixel; counter < image.Width - bytesPerPixel; counter++)
                 {
-                    var neighbors = new List<Color>();
-                    var pixel = image.GetPixel(x, y);
-                    if (pixel.R != 0 || pixel.G != 0 || pixel.B != 0)
-                        continue;
-
+                    var neighbors = new List<Tuple<byte, byte, byte>>();
                     for (var i = 0; i < 3; i++)
                     {
                         for (var j = 0; j < 3; j++)
-                            neighbors.Add(image.GetPixel(x + j - 1, y + i - 1));
+                        {
+                            var y = lineIdx + i - 1;
+                            var sourceIdx = y * image.BytesPerLine + (counter + j - 1) * bytesPerPixel;
+                            neighbors.Add(Tuple.Create(
+                                image.ImageData[sourceIdx],
+                                image.ImageData[sourceIdx + 1],
+                                image.ImageData[sourceIdx + 2]));
+                        }
                     }
 
-                    result.SetPixel(x, y, GetAverageWithoutBlack(neighbors));
+                    var index = lineIdx * image.BytesPerLine + counter * bytesPerPixel;
+                    var averageWithoutBlack = GetAverageWithoutBlack(neighbors);
+                    result.ImageData[index] = averageWithoutBlack.Item1;
+                    result.ImageData[index + 1] = averageWithoutBlack.Item2;
+                    result.ImageData[index + 2] = averageWithoutBlack.Item3;
                 }
             }
 
             return result;
         }
 
-        private static Color GetAverageWithoutBlack(IEnumerable<Color> neighbors)
+        private static Tuple<byte, byte, byte> GetAverageWithoutBlack(IEnumerable<Tuple<byte, byte, byte>> neighbors)
         {
             var r = 0;
             var g = 0;
@@ -99,28 +115,30 @@ namespace DocumentAdjuster.Services
             var countB = 0;
             foreach (var neighbor in neighbors)
             {
-                if (neighbor.R != 0)
+                if (neighbor.Item1 != 0)
                 {
-                    r += neighbor.R;
+                    r += neighbor.Item1;
                     countR++;
                 }
 
-                if (neighbor.G != 0)
+                if (neighbor.Item2 != 0)
                 {
-                    g += neighbor.G;
+                    g += neighbor.Item2;
                     countG++;
                 }
 
-                if (neighbor.B != 0)
+                if (neighbor.Item3 != 0)
                 {
-                    b += neighbor.B;
+                    b += neighbor.Item3;
                     countB++;
                 }
             }
 
-            return countR == 0 
-                ? Color.Black 
-                : Color.FromArgb(r / countR, g / countG, b / countB);
+            var rAverage = countR == 0 ? (byte) 0 : (byte) (r / countR);
+            var gAverage = countG == 0 ? (byte) 0 : (byte) (g / countG);
+            var bAverage = countB == 0 ? (byte) 0 : (byte) (b / countB);
+
+            return new Tuple<byte, byte, byte>(rAverage, gAverage, bAverage);
         }
     }
 }

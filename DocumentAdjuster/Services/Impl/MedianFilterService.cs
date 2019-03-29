@@ -1,31 +1,38 @@
 ﻿using System.Collections.Generic;
+using System.Drawing;
+using Accord.IO;
+using Kontur.Recognition.ImageCore;
 
 namespace DocumentAdjuster.Services
 {
-    internal class MedianFilterService:IMedianFilterService
+    internal class MedianFilterService : IMedianFilterService
     {
-        public int[,] Apply(int[,] image, int radius)
+        public KrecImage Apply(KrecImage image, int radius)
         {
-            var width = image.GetLength(0);
-            var height = image.GetLength(1);
-            var result = new int[width, height];
+            var width = image.Width;
+            var height = image.Height;
+            var result = new KrecImage(image, new byte[image.ImageData.Length]);
             var size = radius * 2 + 1;
 
-            for (var x = radius; x < width - radius; x++)
+            for (var lineIdx = radius; lineIdx < height - radius; lineIdx++)
             {
-                for (var y = radius; y < height - radius; y++)
+                for (var counter = radius; counter < width - radius; counter++)
                 {
-                    var neighborhood = new List<int>();
+                    var neighborhood = new List<byte>();
                     for (var i = 0; i < size; i++)
                     {
                         for (var j = 0; j < size; j++)
-                            neighborhood.Add(image[x + j - radius, y + i - radius]);
+                        {
+                            var y = lineIdx + i - radius;
+                            var sourceIdx = y * image.BytesPerLine + counter;
+                            neighborhood.Add(image.ImageData[sourceIdx + j - radius]);
+                        }
                     }
 
                     neighborhood.Sort();
                     var median = neighborhood[neighborhood.Count / 2];
-                    result[x, y] = median;
-                }                 
+                    result.ImageData[lineIdx * image.BytesPerLine + counter] = median;
+                }
             }
 
             return result;

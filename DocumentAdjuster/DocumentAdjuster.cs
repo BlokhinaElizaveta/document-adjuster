@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
 using DocumentAdjuster.Services;
+using Kontur.Recognition.ImageCore;
 
 namespace DocumentAdjuster
 {
@@ -26,7 +27,8 @@ namespace DocumentAdjuster
             IEquationOfLineService equationOfLineService,
             IMedianFilterService medianFilterService,
             ICornerFinder cornerFinder,
-            IProjectiveTransformationService projectiveTransformation)
+            IProjectiveTransformationService projectiveTransformation
+        )
         {
             this.binarizationService = binarizationService;
             this.borderSearchService = borderSearchService;
@@ -36,7 +38,7 @@ namespace DocumentAdjuster
             this.projectiveTransformation = projectiveTransformation;
         }
 
-        public Bitmap Correct(Bitmap document)
+        public KrecImage Correct(Bitmap document)
         {
             var normalizeDocument = ReduceImage(document);
             var width = normalizeDocument.Width;
@@ -49,12 +51,8 @@ namespace DocumentAdjuster
             Save(binaryDocument, "binaryResult");
 
             sw = Stopwatch.StartNew();
-            var filterDocument = new int[width, height];
-            for (var i = 0; i < 3; i++)
-                filterDocument = medianFilterService.Apply(binaryDocument, 1);
-
-            for (var i = 0; i < 3; i++)
-                filterDocument = medianFilterService.Apply(filterDocument, 3);
+            var filterDocument = medianFilterService.Apply(binaryDocument, 1);
+            filterDocument = medianFilterService.Apply(filterDocument, 5);
             sw.Stop();
             Console.WriteLine($"Apply median filter, time: {sw.ElapsedMilliseconds} ms");
             Save(filterDocument, "filterResult");
@@ -68,10 +66,10 @@ namespace DocumentAdjuster
             Save(documentWithBorders, "bordersResult");
 
             sw = Stopwatch.StartNew();
-            var lines = equationOfLineService.GetLines(borderSearchService.GetPoints(), 4, width,height);
+            var lines = equationOfLineService.GetLines(borderSearchService.GetPoints(), 4, width, height);
             sw.Stop();
             Console.WriteLine($"Find equations of borders: {sw.ElapsedMilliseconds} ms");
-            SaveBorders(lines, width, height, document);
+            SaveBorders(lines, width, height);
 
             sw = Stopwatch.StartNew();
             var corners = cornerFinder.FindCorner(lines, width, height);
@@ -80,7 +78,7 @@ namespace DocumentAdjuster
             Console.WriteLine($"Find corners: {sw.ElapsedMilliseconds} ms");
 
             sw = Stopwatch.StartNew();
-            var correctResult = projectiveTransformation.ApplyTransformMatrix(document, SortCorners(corners));
+            var correctResult = projectiveTransformation.ApplyTransformMatrix(KrecImage.FromBitmap(document), SortCorners(corners));
             sw.Stop();
             Console.WriteLine($"Apply transform matrix and smoothing filter: {sw.ElapsedMilliseconds} ms");
             return correctResult;
@@ -88,13 +86,13 @@ namespace DocumentAdjuster
 
         public void SetDebugMode(bool debugMode) => debug = debugMode;
 
-        private Bitmap ReduceImage(Image document)
+        private KrecImage ReduceImage(Bitmap document)
         {
             var width = 300;
             var height = width * ((double) document.Height / document.Width);
             dx = (double)document.Width / width;
             dy = document.Height / height;
-            return new Bitmap(document, width, (int) height);
+            return KrecImage.FromBitmap(new Bitmap(document, width, (int) height));
         }
 
         private static List<Point> SortCorners(IList<Point> corners)
@@ -117,24 +115,14 @@ namespace DocumentAdjuster
             return sortedCorners;
         }
 
-        private void Save(int[,] pixels, string name)
+        private void Save(KrecImage image, string name)
         {
             if (!debug)
                 return;
-
-            var image = new Bitmap(pixels.GetLength(0), pixels.GetLength(1));
-            for (var x = 0; x < pixels.GetLength(0); x++)
-            {
-                for (var y = 0; y < pixels.GetLength(1); y++)
-                {
-                    image.SetPixel(x, y, Color.FromArgb(pixels[x, y], pixels[x, y], pixels[x, y]));
-                }
-            }
-
-            image.Save($"{name}.bmp", ImageFormat.Bmp);
+            image.SaveToFile($"{name}.bmp");
         }
 
-        private void SaveBorders(Tuple<int, int>[] lines, int width, int height, Bitmap document)
+        private void SaveBorders(Tuple<int, int>[] lines, int width, int height)
         {
             if (!debug)
                 return;
@@ -153,9 +141,7 @@ namespace DocumentAdjuster
                     }
                 }
             }
-
-            var big = new Bitmap(result, document.Width, document.Height);
-            big.Save("borders.bmp", ImageFormat.Bmp);
+            result.Save("borders.bmp", ImageFormat.Bmp);
         }
 
     }

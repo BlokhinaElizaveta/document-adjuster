@@ -4,7 +4,7 @@ using System.Drawing;
 
 namespace DocumentAdjuster.Services
 {
-    internal class CornerFinder:ICornerFinder
+    internal class CornerFinder : ICornerFinder
     {
         public List<Point> FindCorner(Tuple<int, int>[] borders, int width, int height)
         {

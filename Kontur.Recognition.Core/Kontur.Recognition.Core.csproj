@@ -201,11 +201,11 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
-  <ItemGroup>
+  <!-- <ItemGroup>
     <EmbeddedResource Include="Integration\hocr.css" />
     <EmbeddedResource Include="Integration\hocr.js" />
     <EmbeddedResource Include="Integration\jquery.js" />
-  </ItemGroup>
+  </ItemGroup> -->
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

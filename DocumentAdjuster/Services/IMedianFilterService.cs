@@ -1,8 +1,9 @@
-﻿
+﻿using Kontur.Recognition.ImageCore;
+
 namespace DocumentAdjuster.Services
 {
     internal interface IMedianFilterService
     {
-        int[,] Apply(int[,] image, int radius);
+        KrecImage Apply(KrecImage image, int radius);
     }
 }
