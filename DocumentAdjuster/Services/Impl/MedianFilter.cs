@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
-using Accord.IO;
 using Kontur.Recognition.ImageCore;
 
 namespace DocumentAdjuster.Services
 {
-    internal class MedianFilterService : IMedianFilterService
+    internal class MedianFilter : IMedianFilter
     {
         public KrecImage Apply(KrecImage image, int radius)
         {

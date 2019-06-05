@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
+using DocumentAdjuster.Models;
 
 namespace DocumentAdjuster.Services
 {
     internal interface ICornerFinder
     {
-        List<Point> FindCorner(Tuple<int, int>[] borders, int width, int height);
+        List<Point> FindCorner(EquationOfLine[] borders, int width, int height);
     }
 }

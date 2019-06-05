@@ -4,38 +4,34 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
+using DocumentAdjuster.Models;
 using DocumentAdjuster.Services;
+using Kontur.Recognition.ImageBinarizer;
 using Kontur.Recognition.ImageCore;
 
 namespace DocumentAdjuster
 {
-    internal class DocumentAdjuster : IDocumentAdjuster
+    // https://habr.com/ru/company/abbyy/blog/312570/
+    // https://habr.com/ru/company/abbyy/blog/200448/
+    internal class DocumentAdjuster
     {
-        private readonly IBinarizationService binarizationService;
-        private readonly IBorderSearchService borderSearchService;
-        private readonly IEquationOfLineService equationOfLineService;
-        private readonly IMedianFilterService medianFilterService;
+        private readonly IBorderSearcher borderSearcher;
+        private readonly IEquationOfLineFinder equationOfLineFinder;
+        private readonly IMedianFilter medianFilter;
         private readonly ICornerFinder cornerFinder;
-        private readonly IProjectiveTransformationService projectiveTransformation;
+        private readonly IPerspectiveTransformation perspectiveTransformation;
         private bool debug;
 
         private double dx;
         private double dy;
 
-        public DocumentAdjuster(IBinarizationService binarizationService,
-            IBorderSearchService borderSearchService,
-            IEquationOfLineService equationOfLineService,
-            IMedianFilterService medianFilterService,
-            ICornerFinder cornerFinder,
-            IProjectiveTransformationService projectiveTransformation
-        )
+        public DocumentAdjuster()
         {
-            this.binarizationService = binarizationService;
-            this.borderSearchService = borderSearchService;
-            this.equationOfLineService = equationOfLineService;
-            this.medianFilterService = medianFilterService;
-            this.cornerFinder = cornerFinder;
-            this.projectiveTransformation = projectiveTransformation;
+            borderSearcher = new BorderSearcher();
+            equationOfLineFinder = new EquationOfLineFinder();
+            medianFilter = new MedianFilter();
+            cornerFinder = new CornerFinder();
+            perspectiveTransformation = new PerspectiveTransformation();
         }
 
         public KrecImage Correct(Bitmap document)
@@ -44,15 +40,16 @@ namespace DocumentAdjuster
             var width = normalizeDocument.Width;
             var height = normalizeDocument.Height;
 
+            Save(normalizeDocument, "smallDocument");
             var sw = Stopwatch.StartNew();
-            var binaryDocument = binarizationService.MakeBinarized(normalizeDocument);
+            var binaryDocument = normalizeDocument.Binarize();
             sw.Stop();
             Console.WriteLine($"Binarization, time: {sw.ElapsedMilliseconds} ms");
             Save(binaryDocument, "binaryResult");
 
             sw = Stopwatch.StartNew();
-            var filterDocument = medianFilterService.Apply(binaryDocument, 1);
-            filterDocument = medianFilterService.Apply(filterDocument, 5);
+            var filterDocument = medianFilter.Apply(binaryDocument, 3);
+            filterDocument = medianFilter.Apply(filterDocument, 5);
             sw.Stop();
             Console.WriteLine($"Apply median filter, time: {sw.ElapsedMilliseconds} ms");
             Save(filterDocument, "filterResult");
@@ -60,13 +57,13 @@ namespace DocumentAdjuster
             sw = Stopwatch.StartNew();
             var sobelX = new[,] { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
             var sobelY = new[,] { { 1, 2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } };
-            var documentWithBorders = borderSearchService.Search(filterDocument, sobelX, sobelY);
+            var documentWithBorders = borderSearcher.Search(filterDocument, sobelX, sobelY);
             sw.Stop();
             Console.WriteLine($"Get points of borders, time: {sw.ElapsedMilliseconds} ms");
             Save(documentWithBorders, "bordersResult");
 
             sw = Stopwatch.StartNew();
-            var lines = equationOfLineService.GetLines(borderSearchService.GetPoints(), 4, width, height);
+            var lines = equationOfLineFinder.GetLines(borderSearcher.GetPoints(), 4, width, height);
             sw.Stop();
             Console.WriteLine($"Find equations of borders: {sw.ElapsedMilliseconds} ms");
             SaveBorders(lines, width, height);
@@ -78,7 +75,7 @@ namespace DocumentAdjuster
             Console.WriteLine($"Find corners: {sw.ElapsedMilliseconds} ms");
 
             sw = Stopwatch.StartNew();
-            var correctResult = projectiveTransformation.ApplyTransformMatrix(KrecImage.FromBitmap(document), SortCorners(corners));
+            var correctResult = perspectiveTransformation.ApplyTransformMatrix(KrecImage.FromBitmap(document), corners);
             sw.Stop();
             Console.WriteLine($"Apply transform matrix and smoothing filter: {sw.ElapsedMilliseconds} ms");
             return correctResult;
@@ -95,26 +92,6 @@ namespace DocumentAdjuster
             return KrecImage.FromBitmap(new Bitmap(document, width, (int) height));
         }
 
-        private static List<Point> SortCorners(IList<Point> corners)
-        {
-            var sortedCorners = new List<Point>();
-            var first = corners.OrderBy(p => p.X + p.Y).First();
-            corners.Remove(first);
-            sortedCorners.Add(first);
-
-            var second = corners.OrderBy(p => p.Y).First();
-            corners.Remove(second);
-            sortedCorners.Add(second);
-
-            var third = corners.OrderBy(p => p.X).Last();
-            corners.Remove(third);
-            sortedCorners.Add(third);
-
-            sortedCorners.Add(corners[0]);
-
-            return sortedCorners;
-        }
-
         private void Save(KrecImage image, string name)
         {
             if (!debug)
@@ -122,7 +99,7 @@ namespace DocumentAdjuster
             image.SaveToFile($"{name}.bmp");
         }
 
-        private void SaveBorders(Tuple<int, int>[] lines, int width, int height)
+        private void SaveBorders(EquationOfLine[] lines, int width, int height)
         {
             if (!debug)
                 return;
@@ -130,8 +107,8 @@ namespace DocumentAdjuster
             var result = new Bitmap(width, height);
             foreach (var line in lines)
             {
-                var theta = line.Item1 * Math.PI / 180.0;
-                var r = line.Item2;
+                var theta = line.Angle * Math.PI / 180.0;
+                var r = line.Radius;
                 for (var x = 0; x < width; x++)
                 {
                     for (var y = 0; y < height; y++)

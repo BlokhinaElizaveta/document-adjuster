@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using DocumentAdjuster.Models;
 
 namespace DocumentAdjuster.Services
 {
-    internal class EquationOfLineService : IEquationOfLineService
+    // https://habr.com/ru/post/102948/
+    // http://robocraft.ru/blog/computervision/502.html
+    internal class EquationOfLineFinder : IEquationOfLineFinder
     {
-        public Tuple<int, int>[] GetLines(List<Point> points, int count, int width, int height)
+        public EquationOfLine[] GetLines(List<Point> points, int count, int width, int height)
         {
-            const double accuracy = 0.1;
+            const double accuracy = 0.4;
             var diagonalLength = (int) Math.Ceiling(Math.Sqrt(width * width + height * height));
             var accumulator = new int[360, diagonalLength];
 
@@ -18,7 +21,7 @@ namespace DocumentAdjuster.Services
                 {
                     var theta = f * Math.PI / 180.0;
                     var a = point.Y * Math.Sin(theta) + point.X * Math.Cos(theta);
-                    for (var r = 0; r < diagonalLength; r += 10)
+                    for (var r = 0; r < diagonalLength; r += 5)
                     {
                         if (Math.Abs(a - r) < accuracy)
                             accumulator[f, r]++;
@@ -26,8 +29,7 @@ namespace DocumentAdjuster.Services
                 }
             }
 
-
-            var result = new Tuple<int, int>[count];
+            var result = new EquationOfLine[count];
             for (var i = 0; i < count; i++)
             {
                 var rMax = 0;
@@ -46,7 +48,7 @@ namespace DocumentAdjuster.Services
                     }
                 }
 
-                result[i] = new Tuple<int, int>(fMax, rMax);
+                result[i] = new EquationOfLine {Angle = fMax, Radius = rMax};
                 accumulator[fMax, rMax] = 0;
             }
 

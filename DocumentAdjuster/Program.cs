@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using CommandLine;
-using Kontur.Recognition.ImageCore;
-using Ninject;
 
 namespace DocumentAdjuster
 {
@@ -13,10 +11,9 @@ namespace DocumentAdjuster
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed(options =>
                 {
-                    var container = ContainerBuilder.Build();
                     var document = new Bitmap(options.FileName);
                     Console.WriteLine(document.Width + " " + document.Height);
-                    var documentAdjuster = container.Get<IDocumentAdjuster>();
+                    var documentAdjuster = new DocumentAdjuster();
                     documentAdjuster.SetDebugMode(options.Debug);
 
                     var result = documentAdjuster.Correct(document);

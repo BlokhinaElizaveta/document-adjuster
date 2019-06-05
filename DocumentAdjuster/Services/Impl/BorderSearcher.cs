@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using Kontur.Recognition.ImageCore;
 
 namespace DocumentAdjuster.Services
 {
-    internal class BorderSearchService : IBorderSearchService
+    // https://habr.com/ru/post/114452/
+    internal class BorderSearcher : IBorderSearcher
     {
         private readonly List<Point> borderPixels = new List<Point>();
         public KrecImage Search(KrecImage image, int[,] maskX, int[,] maskY)
@@ -22,10 +24,10 @@ namespace DocumentAdjuster.Services
                     var gY = 0;
                     for (var i = 0; i < 3; i++)
                     {
+                        var y = lineIdx + i - 1;
+                        var sourceIdx = y * image.BytesPerLine + counter;
                         for (var j = 0; j < 3; j++)
-                        {
-                            var y = lineIdx + i - 1;
-                            var sourceIdx = y * image.BytesPerLine + counter;
+                        {                         
                             var pixel = image.ImageData[sourceIdx + j - 1];
                             gX += maskX[i, j] * pixel;
                             gY += maskY[i, j] * pixel;
